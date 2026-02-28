@@ -59,6 +59,10 @@ export default async function handler(req, res) {
     return res.status(notionRes.status).json(data);
   }
 
-  // access_token만 반환 (불필요한 정보 노출 방지)
-  return res.status(200).json({ access_token: data.access_token });
+  // 익스텐션에서 필요한 필드만 반환
+  return res.status(200).json({
+    access_token:           data.access_token,
+    workspace_name:         data.workspace_name,
+    duplicated_template_id: data.duplicated_template_id ?? null,
+  });
 }
