@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Padlet to Notion",
   "version": "1.0.0",
-  "description": "패들렛 페이지를 Notion DB에 저장합니다",
+  "description": "Sync Padlet boards to your Notion database with one click. Supports wall, grid, stream, table, and column layouts.",
   "permissions": ["storage", "activeTab", "identity"],
   "host_permissions": [
     "https://padlet.com/*",
