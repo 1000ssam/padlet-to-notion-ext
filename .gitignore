@@ -1,0 +1,15 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Vercel
+oauth-backend/.vercel/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 로컬 개발 환경변수 (절대 커밋 금지)
+.env
+.env.local
+.env*.local

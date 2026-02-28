@@ -1,0 +1,6 @@
+{
+  "name": "padlet-to-notion-oauth-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Notion OAuth token exchange proxy for Padlet to Notion Chrome extension"
+}

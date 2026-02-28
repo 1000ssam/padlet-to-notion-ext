@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Padlet to Notion</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ── 연결 목록 화면 ───────────────────────────────────────────────── -->
+    <div id="listView" class="hidden">
+      <header>
+        <h1>Padlet → Notion</h1>
+      </header>
+      <div class="list-body">
+        <div class="list-header">저장할 연결 선택</div>
+        <div id="connectionList"></div>
+        <div id="notPadletHint" class="hint hidden">⚠️ 패들렛 페이지에서 실행해주세요</div>
+        <button id="addConnectionBtn" class="btn-secondary">+ 새 연결 추가</button>
+      </div>
+    </div>
+
+    <!-- ── 저장 실행 화면 ───────────────────────────────────────────────── -->
+    <div id="saveView" class="hidden">
+      <header class="save-header">
+        <button id="backBtn" class="btn-back" title="뒤로">←</button>
+        <span id="saveViewTitle"></span>
+        <button id="renameConnBtn" class="btn-icon-sm" title="이름 변경">✏️</button>
+        <button id="deleteConnBtn" class="btn-icon-danger" title="연결 삭제">🗑️</button>
+      </header>
+      <div class="save-body">
+        <div id="status" class="status idle">
+          <span id="statusIcon">📤</span>
+          <span id="statusText">패들렛을 노션으로 내보내시겠습니까?</span>
+        </div>
+        <div id="progress" class="hidden">
+          <div class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+          </div>
+          <div id="progressText" class="progress-text">준비 중...</div>
+        </div>
+        <button id="saveBtn" class="btn-primary">확인</button>
+      </div>
+    </div>
+
+    <!-- ── 설정 화면 (연결 추가) ─────────────────────────────────────────── -->
+    <div id="settingsView" class="hidden">
+      <header>
+        <h1>Padlet → Notion</h1>
+      </header>
+      <div class="settings-body">
+        <h2>연결 추가</h2>
+
+        <!-- 연결 이름 -->
+        <div class="form-group">
+          <label for="connNameInput">연결 이름</label>
+          <input type="text" id="connNameInput" placeholder="예: 학교 프로젝트">
+          <div class="hint">비워두면 워크스페이스 이름으로 자동 설정됩니다</div>
+        </div>
+
+        <!-- 인증 방식 -->
+        <div class="form-group">
+          <label>인증 방식</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="authMode" value="oauth" id="authOAuth">
+              <span>Notion 계정 연결 <span class="badge">추천</span></span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="authMode" value="token" id="authToken">
+              <span>통합 토큰 직접 입력</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 토큰 입력 (토큰 모드일 때만) -->
+        <div id="tokenFields" class="form-group hidden">
+          <label for="tokenInput">Notion 통합 토큰</label>
+          <input type="password" id="tokenInput" placeholder="ntn_...">
+        </div>
+
+        <!-- DB 설정 -->
+        <div class="form-group">
+          <label>DB 설정</label>
+          <div class="radio-group">
+            <label class="radio-label" id="createDbLabel">
+              <input type="radio" name="dbMode" value="create" id="modeCreate">
+              <span>새 DB 자동 생성</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="dbMode" value="connect" id="modeConnect">
+              <span>기존 DB 연결</span>
+            </label>
+          </div>
+          <div id="oauthRequired" class="hint hidden">새 DB 생성은 Notion 계정 연결 방식만 지원합니다</div>
+        </div>
+
+        <!-- 기존 DB 연결 전용 -->
+        <div id="existingDbFields" class="hidden">
+          <div class="form-group">
+            <label for="padletDbInput">패들렛 DB</label>
+            <input type="text" id="padletDbInput" placeholder="32자리 ID 또는 Notion URL">
+          </div>
+          <div class="form-group">
+            <label for="postDbInput">포스트 DB</label>
+            <input type="text" id="postDbInput" placeholder="32자리 ID 또는 Notion URL">
+          </div>
+        </div>
+
+        <div id="settingsError" class="error hidden"></div>
+
+        <div class="btn-row">
+          <button id="cancelSettingsBtn" class="btn-secondary">취소</button>
+          <button id="saveSettingsBtn" class="btn-primary">연결하기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 온보딩 화면 ───────────────────────────────────────────────────── -->
+    <div id="onboardingView" class="hidden">
+      <header>
+        <h1>Padlet → Notion</h1>
+      </header>
+      <div class="onboarding-body">
+        <div class="onboarding-icon">🔗</div>
+        <h2>처음 설정</h2>
+        <p>Notion 계정을 연결하면<br>DB를 자동으로 만들어 드려요</p>
+        <button id="oauthStartBtn" class="btn-primary">Notion 계정 연결</button>
+        <div id="onboardingError" class="error hidden"></div>
+
+        <!-- OAuth 완료 후: 이름 설정 단계 -->
+        <div id="onboardingNameSection" class="hidden">
+          <div class="form-group">
+            <label for="onboardingNameInput">연결 이름</label>
+            <input type="text" id="onboardingNameInput" placeholder="연결 이름을 입력하세요">
+          </div>
+          <button id="onboardingConfirmBtn" class="btn-primary">저장하고 시작</button>
+        </div>
+
+        <button id="goToSettingsBtn" class="btn-text">수동으로 설정하기</button>
+      </div>
+    </div>
+
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
