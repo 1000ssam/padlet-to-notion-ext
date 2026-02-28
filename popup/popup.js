@@ -2,7 +2,7 @@
 const OAUTH_CLIENT_ID     = '315d872b-594c-81d6-a8ee-0037df2069f3';
 // client_secret은 Vercel 백엔드(oauth-backend/)에서 환경변수로 관리합니다.
 // Vercel 배포 후 아래 URL을 실제 배포 URL로 교체하세요.
-const OAUTH_TOKEN_ENDPOINT = 'https://YOUR_PROJECT.vercel.app/api/oauth-token';
+const OAUTH_TOKEN_ENDPOINT = 'https://padlet-to-notion-ext.vercel.app/api/oauth-token';
 
 // ─── 전역 상태 ────────────────────────────────────────────────────────────────
 let isSaving = false;
