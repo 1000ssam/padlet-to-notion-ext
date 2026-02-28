@@ -4,6 +4,17 @@ const OAUTH_CLIENT_ID     = '315d872b-594c-81d6-a8ee-0037df2069f3';
 // Vercel 배포 후 아래 URL을 실제 배포 URL로 교체하세요.
 const OAUTH_TOKEN_ENDPOINT = 'https://padlet-to-notion-ext.vercel.app/api/oauth-token';
 
+// ─── SVG 아이콘 ───────────────────────────────────────────────────────────────
+const ICONS = {
+  db: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4.5" rx="4.5" ry="1.8" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 4.5V8C3.5 8.99 5.52 9.8 8 9.8C10.48 9.8 12.5 8.99 12.5 8V4.5" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 8V11.5C3.5 12.49 5.52 13.3 8 13.3C10.48 13.3 12.5 12.49 12.5 11.5V8" stroke="currentColor" stroke-width="1.3"/></svg>`,
+  pencil: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9.5 2.5L11.5 4.5L4.5 11.5H2.5V9.5L9.5 2.5Z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  trash: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 3.5H11.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M4.5 3.5V2.5C4.5 2.22 4.72 2 5 2H9C9.28 2 9.5 2.22 9.5 2.5V3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M10.5 3.5L10 11.5C10 11.78 9.78 12 9.5 12H4.5C4.22 12 4 11.78 4 11.5L3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  export: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 13V5M7 8L10 5L13 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 14V16H16V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  spinner: `<svg class="spin" width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="33 11"/></svg>`,
+  check: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 10.5L8.5 12.5L13.5 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  error: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M10 7V10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="13" r="0.8" fill="currentColor"/></svg>`,
+};
+
 // ─── 전역 상태 ────────────────────────────────────────────────────────────────
 let isSaving = false;
 let currentConnection = null;  // saveView 진입 시 설정
@@ -374,7 +385,7 @@ async function archiveDeletedPosts(padletPageId, upsertedPageIds, conn) {
 // ─── UI 헬퍼 ─────────────────────────────────────────────────────────────────
 function setStatus(type, icon, text) {
   document.getElementById('status').className = `status ${type}`;
-  document.getElementById('statusIcon').textContent = icon;
+  document.getElementById('statusIcon').innerHTML = icon;
   document.getElementById('statusText').textContent = text;
 }
 
@@ -412,7 +423,7 @@ function renderConnectionList(connections) {
 
     const iconEl     = document.createElement('span');
     iconEl.className = 'connection-item-icon';
-    iconEl.textContent = '📋';
+    iconEl.innerHTML = ICONS.db;
 
     const nameEl     = document.createElement('span');
     nameEl.className = 'connection-item-name';
@@ -421,12 +432,12 @@ function renderConnectionList(connections) {
     const renameBtn     = document.createElement('button');
     renameBtn.className = 'connection-rename-btn';
     renameBtn.title     = '이름 변경';
-    renameBtn.textContent = '✏️';
+    renameBtn.innerHTML = ICONS.pencil;
 
     const deleteBtn     = document.createElement('button');
     deleteBtn.className = 'connection-delete-btn';
     deleteBtn.title     = '삭제';
-    deleteBtn.textContent = '🗑️';
+    deleteBtn.innerHTML = ICONS.trash;
 
     item.append(iconEl, nameEl, renameBtn, deleteBtn);
 
@@ -510,7 +521,7 @@ function showSaveView(conn) {
   saveBtn.disabled = false;
 
   // 상태 초기화
-  setStatus('idle', '📤', '패들렛을 노션으로 내보내시겠습니까?');
+  setStatus('idle', ICONS.export, '패들렛을 노션으로 내보내시겠습니까?');
   document.getElementById('progress').classList.add('hidden');
   document.getElementById('progressFill').style.width = '0%';
 
@@ -631,7 +642,7 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
   isSaving = true;
   saveBtn.disabled = true;
   document.getElementById('progress').classList.remove('hidden');
-  setStatus('running', '⏳', '작업 중...');
+  setStatus('running', ICONS.spinner, '작업 중...');
 
   try {
     const conn = currentConnection;
@@ -646,7 +657,7 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
       response = await chrome.tabs.sendMessage(tab.id, { action: 'parsePadlet' });
     } catch {
       // 콘텐츠 스크립트 미주입 → 자동 새로고침 후 재시도
-      setStatus('running', '🔄', '페이지 새로고침 중...');
+      setStatus('running', ICONS.spinner, '페이지 새로고침 중...');
       await chrome.tabs.reload(tab.id);
       await new Promise(resolve => {
         chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
@@ -694,14 +705,14 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
 
     setProgress(100, '완료!');
     const extra = archivedCount > 0 ? ` (${archivedCount}개 아카이브)` : '';
-    setStatus('success', '✅', `포스트 ${posts.length}개 저장 완료${extra} · 커스텀 필드 미지원`);
+    setStatus('success', ICONS.check, `포스트 ${posts.length}개 저장 완료${extra} · 커스텀 필드 미지원`);
 
     // 완료 상태로 전환
     saveBtn.textContent = '완료';
     saveBtn.dataset.done = 'true';
     saveBtn.classList.add('btn-done');
   } catch (err) {
-    setStatus('error', '❌', err.message);
+    setStatus('error', ICONS.error, err.message);
   } finally {
     isSaving = false;
     saveBtn.disabled = false;
